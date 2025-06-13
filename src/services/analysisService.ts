@@ -41,7 +41,7 @@ interface AnalysisResults {
 }
 
 export class AnalysisService {
-  private static GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || '';
+  private static GEMINI_API_KEY = 'AIzaSyBg5__RmySYRn3eTNtgd0nn1goaEgZSgjU';
 
   static async performAnalysis(data: AnalysisData): Promise<AnalysisResults> {
     try {
@@ -69,12 +69,9 @@ export class AnalysisService {
   }
 
   private static async extractResumeText(file: File): Promise<string> {
-    // Simple text extraction for PDFs
-    // In a real implementation, you'd use a PDF parsing library
     return new Promise((resolve) => {
       const reader = new FileReader();
       reader.onload = (e) => {
-        // This is a simplified extraction - in reality, you'd need proper PDF parsing
         const result = e.target?.result as string;
         resolve(result || 'Resume content could not be extracted');
       };
@@ -84,9 +81,6 @@ export class AnalysisService {
 
   private static async scrapeLinkedInProfile(url: string): Promise<LinkedInProfile> {
     try {
-      // Note: In a real implementation, you'd need a backend service for web scraping
-      // LinkedIn blocks direct scraping from frontend. This is a mock implementation.
-      
       console.log('Scraping LinkedIn profile:', url);
       
       // Mock LinkedIn data for demo purposes
@@ -145,15 +139,29 @@ export class AnalysisService {
       });
 
       if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Gemini API error:', errorData);
         throw new Error(`Gemini API error: ${response.statusText}`);
       }
 
       const data = await response.json();
+      
+      if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
+        console.error('Invalid response from Gemini API:', data);
+        throw new Error('Invalid response from Gemini API');
+      }
+      
       const analysisText = data.candidates[0].content.parts[0].text;
+      console.log('Gemini response:', analysisText);
       
       return this.parseGeminiResponse(analysisText);
     } catch (error) {
       console.error('Gemini API analysis failed:', error);
+      toast({
+        title: "Using demo data",
+        description: "Gemini API call failed. Showing sample analysis results.",
+        variant: "default"
+      });
       
       // Return mock analysis results for demo purposes
       return this.getMockAnalysisResults();
@@ -224,7 +232,11 @@ export class AnalysisService {
       // Extract JSON from the response
       const jsonMatch = responseText.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
-        return JSON.parse(jsonMatch[0]);
+        const parsed = JSON.parse(jsonMatch[0]);
+        // Validate the response has the required structure
+        if (parsed.overallScore && parsed.resumeAnalysis && parsed.jobMatch && parsed.recommendations) {
+          return parsed;
+        }
       }
       throw new Error('No valid JSON found in response');
     } catch (error) {
