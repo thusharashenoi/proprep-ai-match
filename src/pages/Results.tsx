@@ -1,0 +1,367 @@
+
+import { useState, useEffect } from "react";
+import { useLocation, Link } from "react-router-dom";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ArrowLeft, Download, RefreshCw, CheckCircle, AlertCircle, TrendingUp, User, FileText, Building } from "lucide-react";
+
+interface AnalysisResults {
+  overallScore: number;
+  resumeAnalysis: {
+    strengths: string[];
+    weaknesses: string[];
+    suggestions: string[];
+    atsScore: number;
+  };
+  linkedinAnalysis: {
+    profileStrength: number;
+    missingElements: string[];
+    recommendations: string[];
+  };
+  jobMatch: {
+    matchPercentage: number;
+    keywordAlignment: number;
+    skillsMatch: string[];
+    skillsGap: string[];
+  };
+  recommendations: {
+    immediate: string[];
+    shortTerm: string[];
+    longTerm: string[];
+  };
+}
+
+const Results = () => {
+  const location = useLocation();
+  const [results, setResults] = useState<AnalysisResults | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const analysisResults = location.state?.results;
+    if (analysisResults) {
+      setResults(analysisResults);
+      setLoading(false);
+    } else {
+      // Redirect back if no results
+      setTimeout(() => {
+        window.history.back();
+      }, 2000);
+    }
+  }, [location.state]);
+
+  if (loading || !results) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center">
+        <div className="text-center">
+          <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-4 text-blue-600" />
+          <p className="text-gray-600">Loading your analysis results...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const getScoreColor = (score: number) => {
+    if (score >= 80) return "text-green-600";
+    if (score >= 60) return "text-yellow-600";
+    return "text-red-600";
+  };
+
+  const getProgressColor = (score: number) => {
+    if (score >= 80) return "bg-green-500";
+    if (score >= 60) return "bg-yellow-500";
+    return "bg-red-500";
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <Link to="/analysis" className="inline-flex items-center text-blue-600 hover:text-blue-700 mb-4">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Analysis
+          </Link>
+          <div className="flex justify-between items-start">
+            <div>
+              <h1 className="text-4xl font-bold text-gray-900 mb-4">
+                Your AI Analysis Results
+              </h1>
+              <p className="text-xl text-gray-600">
+                Comprehensive insights to boost your job application success
+              </p>
+            </div>
+            <Button className="bg-blue-600 hover:bg-blue-700">
+              <Download className="w-4 h-4 mr-2" />
+              Export Report
+            </Button>
+          </div>
+        </div>
+
+        {/* Overall Score */}
+        <Card className="mb-8 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-2xl">
+              <TrendingUp className="w-6 h-6" />
+              Overall Job Readiness Score
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center gap-6">
+              <div className="text-6xl font-bold">{results.overallScore}%</div>
+              <div className="flex-1">
+                <Progress value={results.overallScore} className="h-4 mb-2 bg-white/20" />
+                <p className="text-blue-100">
+                  {results.overallScore >= 80 ? "Excellent job readiness!" : 
+                   results.overallScore >= 60 ? "Good foundation, room for improvement" : 
+                   "Significant improvements needed"}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Detailed Analysis Tabs */}
+        <Tabs defaultValue="resume" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="resume" className="flex items-center gap-2">
+              <FileText className="w-4 h-4" />
+              Resume
+            </TabsTrigger>
+            <TabsTrigger value="linkedin" className="flex items-center gap-2">
+              <User className="w-4 h-4" />
+              LinkedIn
+            </TabsTrigger>
+            <TabsTrigger value="job-match" className="flex items-center gap-2">
+              <Building className="w-4 h-4" />
+              Job Match
+            </TabsTrigger>
+            <TabsTrigger value="recommendations" className="flex items-center gap-2">
+              <CheckCircle className="w-4 h-4" />
+              Action Plan
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Resume Analysis */}
+          <TabsContent value="resume" className="space-y-6">
+            <div className="grid md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-green-600 flex items-center gap-2">
+                    <CheckCircle className="w-5 h-5" />
+                    Strengths
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-2">
+                    {results.resumeAnalysis.strengths.map((strength, index) => (
+                      <li key={index} className="flex items-start gap-2">
+                        <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span className="text-sm">{strength}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-red-600 flex items-center gap-2">
+                    <AlertCircle className="w-5 h-5" />
+                    Areas for Improvement
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-2">
+                    {results.resumeAnalysis.weaknesses.map((weakness, index) => (
+                      <li key={index} className="flex items-start gap-2">
+                        <AlertCircle className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
+                        <span className="text-sm">{weakness}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>ATS Compatibility Score</CardTitle>
+                <CardDescription>How well your resume will pass through Applicant Tracking Systems</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-4 mb-4">
+                  <div className={`text-3xl font-bold ${getScoreColor(results.resumeAnalysis.atsScore)}`}>
+                    {results.resumeAnalysis.atsScore}%
+                  </div>
+                  <Progress value={results.resumeAnalysis.atsScore} className="flex-1 h-3" />
+                </div>
+                <div className="space-y-2">
+                  {results.resumeAnalysis.suggestions.map((suggestion, index) => (
+                    <p key={index} className="text-sm text-gray-600 bg-gray-50 p-3 rounded">
+                      {suggestion}
+                    </p>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* LinkedIn Analysis */}
+          <TabsContent value="linkedin" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>LinkedIn Profile Strength</CardTitle>
+                <CardDescription>Analysis of your LinkedIn profile completeness and optimization</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-4 mb-6">
+                  <div className={`text-3xl font-bold ${getScoreColor(results.linkedinAnalysis.profileStrength)}`}>
+                    {results.linkedinAnalysis.profileStrength}%
+                  </div>
+                  <Progress value={results.linkedinAnalysis.profileStrength} className="flex-1 h-3" />
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <h4 className="font-semibold text-red-600 mb-3">Missing Elements</h4>
+                    <ul className="space-y-2">
+                      {results.linkedinAnalysis.missingElements.map((element, index) => (
+                        <li key={index} className="flex items-start gap-2">
+                          <AlertCircle className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
+                          <span className="text-sm">{element}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold text-blue-600 mb-3">Recommendations</h4>
+                    <ul className="space-y-2">
+                      {results.linkedinAnalysis.recommendations.map((rec, index) => (
+                        <li key={index} className="flex items-start gap-2">
+                          <CheckCircle className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
+                          <span className="text-sm">{rec}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Job Match Analysis */}
+          <TabsContent value="job-match" className="space-y-6">
+            <div className="grid md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Job Match Score</CardTitle>
+                  <CardDescription>How well you align with the job requirements</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className={`text-3xl font-bold ${getScoreColor(results.jobMatch.matchPercentage)}`}>
+                      {results.jobMatch.matchPercentage}%
+                    </div>
+                    <Progress value={results.jobMatch.matchPercentage} className="flex-1 h-3" />
+                  </div>
+                  <p className="text-sm text-gray-600">
+                    Keyword Alignment: <span className="font-semibold">{results.jobMatch.keywordAlignment}%</span>
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-green-600">Matching Skills</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-2">
+                    {results.jobMatch.skillsMatch.map((skill, index) => (
+                      <span key={index} className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-red-600">Skills Gap</CardTitle>
+                <CardDescription>Skills mentioned in the job posting that you should highlight or develop</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-2">
+                  {results.jobMatch.skillsGap.map((skill, index) => (
+                    <span key={index} className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm">
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Recommendations */}
+          <TabsContent value="recommendations" className="space-y-6">
+            <div className="grid gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-green-600">Immediate Actions (This Week)</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-3">
+                    {results.recommendations.immediate.map((action, index) => (
+                      <li key={index} className="flex items-start gap-3">
+                        <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>{action}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-blue-600">Short-term Goals (This Month)</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-3">
+                    {results.recommendations.shortTerm.map((action, index) => (
+                      <li key={index} className="flex items-start gap-3">
+                        <CheckCircle className="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" />
+                        <span>{action}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-purple-600">Long-term Development (Next 3 Months)</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-3">
+                    {results.recommendations.longTerm.map((action, index) => (
+                      <li key={index} className="flex items-start gap-3">
+                        <CheckCircle className="w-5 h-5 text-purple-500 mt-0.5 flex-shrink-0" />
+                        <span>{action}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
+  );
+};
+
+export default Results;
