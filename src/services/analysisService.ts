@@ -1,4 +1,3 @@
-
 import { toast } from "@/hooks/use-toast";
 
 interface AnalysisData {
@@ -42,7 +41,7 @@ interface AnalysisResults {
 }
 
 export class AnalysisService {
-  private static GEMINI_API_KEY = process.env.REACT_APP_GEMINI_API_KEY || '';
+  private static GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || '';
 
   static async performAnalysis(data: AnalysisData): Promise<AnalysisResults> {
     try {
