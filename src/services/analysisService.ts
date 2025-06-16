@@ -1,15 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
 import { toast } from "@/hooks/use-toast";
 import Tesseract from 'tesseract.js';
 // import * as pdfjsLib from 'pdfjs-dist/webpack';
