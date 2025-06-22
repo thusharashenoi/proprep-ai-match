@@ -45,6 +45,11 @@ interface AnalysisResults {
 
 export class AnalysisService {
   private static GEMINI_API_KEY = 'AIzaSyBg5__RmySYRn3eTNtgd0nn1goaEgZSgjU';
+  
+  // Configure your backend URL - change this to match your actual setup
+  private static BACKEND_URL = process.env.NODE_ENV === 'production' 
+    ? 'https://your-production-backend.com' 
+    : 'http://localhost:3000'; // Note: HTTP not HTTPS for localhost
 
   static async performAnalysis(data: AnalysisData): Promise<AnalysisResults> {
     try {
@@ -64,7 +69,7 @@ export class AnalysisService {
       let linkedinProfile: LinkedInProfile | null = null;
       if (data.linkedinUrl) {
         console.log("Fetching LinkedIn Profile for:", data.linkedinUrl);
-        linkedinProfile = await this.extractLinkedInData(data.linkedinUrl);
+        linkedinProfile = await this.fetchLinkedInDataFromBackend(data.linkedinUrl);
         console.log("LinkedIn Profile Data:", JSON.stringify(linkedinProfile, null, 2));
       } else {
         console.log("No LinkedIn URL Provided - Skipping Profile Scraping.");
@@ -79,8 +84,122 @@ export class AnalysisService {
     }
   }
 
-  // -------------------- STEP 1: Job Description Parsing --------------------
+  // -------------------- FIXED: LinkedIn Profile Extraction --------------------
+  
+  private static async fetchLinkedInDataFromBackend(linkedinUrl: string): Promise<LinkedInProfile | null> {
+    try {
+      console.log("Requesting LinkedIn profile data from backend...");
+      
+      // Option 1: Use the full analysis endpoint (recommended)
+      const response = await fetch(`${this.BACKEND_URL}/api/linkedin/analyze`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          profileUrl: linkedinUrl
+        }),
+      });
 
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        console.error("Failed LinkedIn Fetch:", response.statusText, errorData);
+        throw new Error(`Failed to fetch LinkedIn data: ${errorData.error || response.statusText}`);
+      }
+
+      const result = await response.json();
+      console.log("Backend Response:", JSON.stringify(result, null, 2));
+      
+      if (result.success && result.data?.analysisData) {
+        // Convert the backend analysis data to your expected format
+        return this.convertBackendDataToLinkedInProfile(result.data.analysisData);
+      } else {
+        console.warn("No analysis data returned from backend, using screenshot-only mode");
+        // You could still return some basic data or null
+        return null;
+      }
+      
+    } catch (error) {
+      console.error("LinkedIn Data Fetch Failed:", error);
+      
+      // Try fallback: screenshot-only mode
+      try {
+        console.log("Attempting screenshot-only fallback...");
+        return await this.fetchLinkedInScreenshotOnly(linkedinUrl);
+      } catch (fallbackError) {
+        console.error("Screenshot fallback also failed:", fallbackError);
+        return null;
+      }
+    }
+  }
+
+  // Alternative: Screenshot-only mode as fallback
+  private static async fetchLinkedInScreenshotOnly(linkedinUrl: string): Promise<LinkedInProfile | null> {
+    try {
+      const response = await fetch(`${this.BACKEND_URL}/api/linkedin/quick-screenshot`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          profileUrl: linkedinUrl
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        throw new Error(`Screenshot failed: ${errorData.error || response.statusText}`);
+      }
+
+      const result = await response.json();
+      console.log("Screenshot taken:", result.data?.screenshotUrl);
+      
+      // Return minimal profile data since we only have screenshot
+      return {
+        name: "Profile captured via screenshot",
+        headline: "Analysis pending",
+        experience: ["Screenshot analysis mode"],
+        skills: ["Manual review required"],
+        education: ["See screenshot for details"]
+      };
+      
+    } catch (error) {
+      console.error("Screenshot fallback failed:", error);
+      throw error;
+    }
+  }
+
+  // Helper to convert backend analysis data to your expected format
+  private static convertBackendDataToLinkedInProfile(analysisData: any): LinkedInProfile {
+    // This depends on what your backend's AI analysis returns
+    // You'll need to adjust this based on the actual structure
+    return {
+      name: analysisData.name || analysisData.fullName || "Name not extracted",
+      headline: analysisData.headline || analysisData.title || "Headline not extracted", 
+      experience: Array.isArray(analysisData.experience) ? analysisData.experience : 
+                 analysisData.workExperience ? [analysisData.workExperience] : ["Experience not extracted"],
+      skills: Array.isArray(analysisData.skills) ? analysisData.skills : 
+              analysisData.skillsList ? analysisData.skillsList : ["Skills not extracted"],
+      education: Array.isArray(analysisData.education) ? analysisData.education :
+                 analysisData.educationBackground ? [analysisData.educationBackground] : ["Education not extracted"]
+    };
+  }
+
+  // Add a method to check backend status
+  static async checkBackendStatus(): Promise<boolean> {
+    try {
+      const response = await fetch(`${this.BACKEND_URL}/api/linkedin/status`);
+      const status = await response.json();
+      console.log("Backend status:", status);
+      return status.success;
+    } catch (error) {
+      console.error("Backend status check failed:", error);
+      return false;
+    }
+  }
+
+  // Rest of your existing methods remain the same...
+  
   private static async parseJobDescription(jobDescription: string): Promise<string> {
     console.log("Received Job Description:", jobDescription);
 
@@ -97,8 +216,6 @@ export class AnalysisService {
 
     return await this.sendToGemini(prompt);
   }
-
-  // -------------------- STEP 2: Send PDF Resume Directly to Gemini --------------------
 
   private static async analyzePDFWithGemini(pdfFile: File): Promise<string> {
     try {
@@ -127,8 +244,6 @@ export class AnalysisService {
       };
 
       console.log("Sending PDF and Prompt to Gemini...");
-      console.log("Request Payload:", JSON.stringify(requestPayload, null, 2));
-
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${this.GEMINI_API_KEY}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -155,7 +270,7 @@ export class AnalysisService {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => {
-        const base64String = (reader.result as string).split(',')[1]; // Extract Base64 content
+        const base64String = (reader.result as string).split(',')[1];
         resolve(base64String);
       };
       reader.onerror = (error) => {
@@ -166,54 +281,8 @@ export class AnalysisService {
     });
   }
 
-  // -------------------- STEP 3: LinkedIn Profile Extraction --------------------
-
-    
-  private static async extractLinkedInData(linkedinUrl: string): Promise<LinkedInProfile | null> {
-    try {
-      console.log("Validating LinkedIn URL:", linkedinUrl);
-      if (!linkedinUrl.includes("linkedin.com")) {
-        throw new Error("Invalid LinkedIn URL.");
-      }
-
-      console.log("Scraping LinkedIn Profile...");
-      const response = await fetch(`/api/linkedin?url=${encodeURIComponent(linkedinUrl)}`);
-      if (!response.ok) {
-        console.error("Failed LinkedIn Fetch:", response.statusText);
-        throw new Error("Failed to fetch LinkedIn data.");
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error("LinkedIn Data Extraction Failed:", error);
-      return null;
-    }
-  }
-  // -------------------- STEP 3: Fetch LinkedIn Profile Data from Backend --------------------
-
-  private static async fetchLinkedInDataFromBackend(linkedinUrl: string): Promise<LinkedInProfile | null> {
-    try {
-      console.log("Requesting LinkedIn profile data from backend...");
-      const response = await fetch(`http://localhost:5000/api/linkedin?url=${encodeURIComponent(linkedinUrl)}`);
-
-      if (!response.ok) {
-        console.error("Failed LinkedIn Fetch:", response.statusText);
-        throw new Error("Failed to fetch LinkedIn data.");
-      }
-
-      const profileData = await response.json();
-      console.log("Fetched LinkedIn Profile Data:", JSON.stringify(profileData, null, 2));
-      
-      return profileData;
-    } catch (error) {
-      console.error("LinkedIn Data Fetch Failed:", error);
-      return null;
-    }
-  }
-
-  // -------------------- STEP 4: Final Analysis with Gemini --------------------
-private static async analyzeWithGemini(jobDescription: string, resumeText: string, linkedinProfile: LinkedInProfile | null): Promise<AnalysisResults> {
-  const prompt = `Analyze the following career-related inputs and provide structured insights:
+  private static async analyzeWithGemini(jobDescription: string, resumeText: string, linkedinProfile: LinkedInProfile | null): Promise<AnalysisResults> {
+    const prompt = `Analyze the following career-related inputs and provide structured insights:
 
 JOB DESCRIPTION:
 ${jobDescription}
@@ -258,34 +327,27 @@ Return results **strictly in JSON format**, following this structure:
 
 **DO NOT** include Markdown formatting (like \`\`\`json). The response **must** be valid JSON without extra text, code blocks, or explanations.`;
 
+    const rawResponse = await this.sendToGemini(prompt);
 
-  const rawResponse = await this.sendToGemini(prompt);
+    const jsonMatch = rawResponse.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      console.error("Failed to find JSON in Gemini response:", rawResponse);
+      throw new Error("Gemini response does not contain valid JSON.");
+    }
 
-  // **Extract JSON from response** by removing Markdown formatting
-  const jsonMatch = rawResponse.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) {
-    console.error("Failed to find JSON in Gemini response:", rawResponse);
-    throw new Error("Gemini response does not contain valid JSON.");
+    const cleanedResponse = jsonMatch[0];
+
+    try {
+      return JSON.parse(cleanedResponse);
+    } catch (error) {
+      console.error("Failed to parse Gemini response:", cleanedResponse);
+      throw new Error("Gemini returned an invalid JSON format.");
+    }
   }
-
-  const cleanedResponse = jsonMatch[0]; // Extract the JSON portion
-
-  try {
-    return JSON.parse(cleanedResponse);
-  } catch (error) {
-    console.error("Failed to parse Gemini response:", cleanedResponse);
-    throw new Error("Gemini returned an invalid JSON format.");
-  }
-}
-
-
-  // -------------------- HELPER FUNCTION: Send Request to Gemini API --------------------
 
   private static async sendToGemini(prompt: string): Promise<string> {
     try {
       console.log("Sending Request to Gemini API...");
-      console.log("Generated Prompt:", prompt);
-
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${this.GEMINI_API_KEY}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -302,8 +364,6 @@ Return results **strictly in JSON format**, following this structure:
       }
 
       const data = await response.json();
-      console.log("Raw Gemini API Response:", JSON.stringify(data, null, 2));
-
       return data.candidates[0].content.parts[0].text;
     } catch (error) {
       console.error("Gemini API Call Failed:", error);
@@ -311,6 +371,3 @@ Return results **strictly in JSON format**, following this structure:
     }
   }
 }
-
-
-
