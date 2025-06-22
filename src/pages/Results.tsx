@@ -1,11 +1,27 @@
+
+
 import { useState, useEffect } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, RefreshCw, CheckCircle, AlertCircle, TrendingUp, User, FileText, Building } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { ArrowLeft, RefreshCw, CheckCircle, AlertCircle, TrendingUp, User, FileText, Building, Target, Star, AlertTriangle } from "lucide-react";
 import PDFExport from "@/components/PDFExport";
+
+interface LinkedInSection {
+  name: string;
+  coordinates: [number, number];
+  criticality: 'red' | 'yellow' | 'green';
+  score: number;
+  comment: string;
+  priority: number;
+  improvements: string[];
+  industry_benchmark: string;
+  impact_on_opportunities: string;
+  detailed_analysis: string;
+}
 
 interface AnalysisResults {
   overallScore: number;
@@ -14,17 +30,25 @@ interface AnalysisResults {
     weaknesses: string[];
     suggestions: string[];
     atsScore: number;
+    skills?: string[];
+    experience?: string[];
+    keywords?: string[];
   };
   linkedinAnalysis: {
-    profileStrength: number;
+    overallScore: number;
     missingElements: string[];
     recommendations: string[];
+    detailedSections?: LinkedInSection[];
+    criticalIssues?: string[];
+    competitiveAdvantages?: string[];
   };
   jobMatch: {
     matchPercentage: number;
     keywordAlignment: number;
     skillsMatch: string[];
     skillsGap: string[];
+    matchingStrengths?: string[];
+    improvementAreas?: string[];
   };
   recommendations: {
     immediate: string[];
@@ -72,6 +96,24 @@ const Results = () => {
     if (score >= 80) return "bg-green-500";
     if (score >= 60) return "bg-yellow-500";
     return "bg-red-500";
+  };
+
+  const getCriticalityColor = (criticality: 'red' | 'yellow' | 'green') => {
+    switch (criticality) {
+      case 'red': return 'bg-red-100 text-red-800 border-red-200';
+      case 'yellow': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'green': return 'bg-green-100 text-green-800 border-green-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
+  const getCriticalityIcon = (criticality: 'red' | 'yellow' | 'green') => {
+    switch (criticality) {
+      case 'red': return <AlertTriangle className="w-4 h-4" />;
+      case 'yellow': return <AlertCircle className="w-4 h-4" />;
+      case 'green': return <CheckCircle className="w-4 h-4" />;
+      default: return <AlertCircle className="w-4 h-4" />;
+    }
   };
 
   return (
@@ -148,7 +190,7 @@ const Results = () => {
 
           {/* Resume Analysis */}
           <TabsContent value="resume" className="space-y-6">
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid lg:grid-cols-2 gap-6">
               <Card>
                 <CardHeader>
                   <CardTitle className="text-green-600 flex items-center gap-2">
@@ -188,6 +230,46 @@ const Results = () => {
               </Card>
             </div>
 
+            {/* Skills and Keywords */}
+            {(results.resumeAnalysis.skills || results.resumeAnalysis.keywords) && (
+              <div className="grid lg:grid-cols-2 gap-6">
+                {results.resumeAnalysis.skills && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-blue-600">Identified Skills</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex flex-wrap gap-2">
+                        {results.resumeAnalysis.skills.map((skill, index) => (
+                          <Badge key={index} variant="secondary" className="bg-blue-100 text-blue-800">
+                            {skill}
+                          </Badge>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {results.resumeAnalysis.keywords && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-purple-600">Key Terms</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex flex-wrap gap-2">
+                        {results.resumeAnalysis.keywords.map((keyword, index) => (
+                          <Badge key={index} variant="outline" className="text-purple-600 border-purple-200">
+                            {keyword}
+                          </Badge>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            )}
+
+            {/* ATS Score */}
             <Card>
               <CardHeader>
                 <CardTitle>ATS Compatibility Score</CardTitle>
@@ -220,15 +302,18 @@ const Results = () => {
               </CardHeader>
               <CardContent>
                 <div className="flex items-center gap-4 mb-6">
-                  <div className={`text-3xl font-bold ${getScoreColor(results.linkedinAnalysis.profileStrength)}`}>
-                    {results.linkedinAnalysis.profileStrength}%
+                  <div className={`text-3xl font-bold ${getScoreColor(results.linkedinAnalysis.overallScore)}`}>
+                    {results.linkedinAnalysis.overallScore}%
                   </div>
-                  <Progress value={results.linkedinAnalysis.profileStrength} className="flex-1 h-3" />
+                  <Progress value={results.linkedinAnalysis.overallScore} className="flex-1 h-3" />
                 </div>
 
-                <div className="grid md:grid-cols-2 gap-6">
+                <div className="grid lg:grid-cols-2 gap-6">
                   <div>
-                    <h4 className="font-semibold text-red-600 mb-3">Missing Elements</h4>
+                    <h4 className="font-semibold text-red-600 mb-3 flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4" />
+                      Missing Elements
+                    </h4>
                     <ul className="space-y-2">
                       {results.linkedinAnalysis.missingElements.map((element, index) => (
                         <li key={index} className="flex items-start gap-2">
@@ -240,7 +325,10 @@ const Results = () => {
                   </div>
 
                   <div>
-                    <h4 className="font-semibold text-blue-600 mb-3">Recommendations</h4>
+                    <h4 className="font-semibold text-blue-600 mb-3 flex items-center gap-2">
+                      <CheckCircle className="w-4 h-4" />
+                      Recommendations
+                    </h4>
                     <ul className="space-y-2">
                       {results.linkedinAnalysis.recommendations.map((rec, index) => (
                         <li key={index} className="flex items-start gap-2">
@@ -253,11 +341,121 @@ const Results = () => {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Critical Issues and Competitive Advantages */}
+            {(results.linkedinAnalysis.criticalIssues || results.linkedinAnalysis.competitiveAdvantages) && (
+              <div className="grid lg:grid-cols-2 gap-6">
+                {results.linkedinAnalysis.criticalIssues && results.linkedinAnalysis.criticalIssues.length > 0 && (
+                  <Card className="border-red-200">
+                    <CardHeader>
+                      <CardTitle className="text-red-600 flex items-center gap-2">
+                        <AlertTriangle className="w-5 h-5" />
+                        Critical Issues
+                      </CardTitle>
+                      <CardDescription>High-priority items that need immediate attention</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <ul className="space-y-2">
+                        {results.linkedinAnalysis.criticalIssues.map((issue, index) => (
+                          <li key={index} className="flex items-start gap-2">
+                            <AlertTriangle className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
+                            <span className="text-sm text-red-700">{issue}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {results.linkedinAnalysis.competitiveAdvantages && results.linkedinAnalysis.competitiveAdvantages.length > 0 && (
+                  <Card className="border-green-200">
+                    <CardHeader>
+                      <CardTitle className="text-green-600 flex items-center gap-2">
+                        <Star className="w-5 h-5" />
+                        Competitive Advantages
+                      </CardTitle>
+                      <CardDescription>Your standout strengths that give you an edge</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <ul className="space-y-2">
+                        {results.linkedinAnalysis.competitiveAdvantages.map((advantage, index) => (
+                          <li key={index} className="flex items-start gap-2">
+                            <Star className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                            <span className="text-sm text-green-700">{advantage}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            )}
+
+            {/* Detailed Section Analysis */}
+            {results.linkedinAnalysis.detailedSections && results.linkedinAnalysis.detailedSections.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Profile Section Analysis</CardTitle>
+                  <CardDescription>Detailed breakdown of each LinkedIn profile section</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {results.linkedinAnalysis.detailedSections
+                      .sort((a, b) => a.priority - b.priority)
+                      .map((section, index) => (
+                        <div key={index} className="border rounded-lg p-4">
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-3">
+                              <h5 className="font-semibold text-gray-900">{section.name}</h5>
+                              <Badge 
+                                variant="outline" 
+                                className={`${getCriticalityColor(section.criticality)} border`}
+                              >
+                                <span className="flex items-center gap-1">
+                                  {getCriticalityIcon(section.criticality)}
+                                  {section.criticality.toUpperCase()}
+                                </span>
+                              </Badge>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className={`text-lg font-bold ${getScoreColor(section.score)}`}>
+                                {section.score}%
+                              </span>
+                            </div>
+                          </div>
+                          
+                          <p className="text-sm text-gray-600 mb-3">{section.comment}</p>
+                          
+                          {section.improvements.length > 0 && (
+                            <div className="mb-3">
+                              <h6 className="font-medium text-gray-700 mb-2">Improvements:</h6>
+                              <ul className="text-sm text-gray-600 space-y-1">
+                                {section.improvements.map((improvement, impIndex) => (
+                                  <li key={impIndex} className="flex items-start gap-2">
+                                    <Target className="w-3 h-3 text-blue-500 mt-0.5 flex-shrink-0" />
+                                    {improvement}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                          
+                          {section.industry_benchmark && (
+                            <div className="text-xs text-gray-500 bg-gray-50 p-2 rounded">
+                              <strong>Industry Benchmark:</strong> {section.industry_benchmark}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           {/* Job Match Analysis */}
           <TabsContent value="job-match" className="space-y-6">
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid lg:grid-cols-2 gap-6">
               <Card>
                 <CardHeader>
                   <CardTitle>Job Match Score</CardTitle>
@@ -283,9 +481,9 @@ const Results = () => {
                 <CardContent>
                   <div className="flex flex-wrap gap-2">
                     {results.jobMatch.skillsMatch.map((skill, index) => (
-                      <span key={index} className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
+                      <Badge key={index} className="bg-green-100 text-green-800">
                         {skill}
-                      </span>
+                      </Badge>
                     ))}
                   </div>
                 </CardContent>
@@ -300,21 +498,72 @@ const Results = () => {
               <CardContent>
                 <div className="flex flex-wrap gap-2">
                   {results.jobMatch.skillsGap.map((skill, index) => (
-                    <span key={index} className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm">
+                    <Badge key={index} variant="destructive" className="bg-red-100 text-red-800">
                       {skill}
-                    </span>
+                    </Badge>
                   ))}
                 </div>
               </CardContent>
             </Card>
+
+            {/* Enhanced Job Match Details */}
+            {(results.jobMatch.matchingStrengths || results.jobMatch.improvementAreas) && (
+              <div className="grid lg:grid-cols-2 gap-6">
+                {results.jobMatch.matchingStrengths && results.jobMatch.matchingStrengths.length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-green-600 flex items-center gap-2">
+                        <Star className="w-5 h-5" />
+                        Your Strengths for This Role
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ul className="space-y-2">
+                        {results.jobMatch.matchingStrengths.map((strength, index) => (
+                          <li key={index} className="flex items-start gap-2">
+                            <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                            <span className="text-sm">{strength}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {results.jobMatch.improvementAreas && results.jobMatch.improvementAreas.length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-orange-600 flex items-center gap-2">
+                        <Target className="w-5 h-5" />
+                        Areas to Emphasize
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ul className="space-y-2">
+                        {results.jobMatch.improvementAreas.map((area, index) => (
+                          <li key={index} className="flex items-start gap-2">
+                            <Target className="w-4 h-4 text-orange-500 mt-0.5 flex-shrink-0" />
+                            <span className="text-sm">{area}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            )}
           </TabsContent>
 
           {/* Recommendations */}
           <TabsContent value="recommendations" className="space-y-6">
             <div className="grid gap-6">
-              <Card>
+              <Card className="border-green-200">
                 <CardHeader>
-                  <CardTitle className="text-green-600">Immediate Actions (This Week)</CardTitle>
+                  <CardTitle className="text-green-600 flex items-center gap-2">
+                    <CheckCircle className="w-5 h-5" />
+                    Immediate Actions (This Week)
+                  </CardTitle>
+                  <CardDescription>Quick wins that can boost your profile immediately</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-3">
@@ -328,15 +577,19 @@ const Results = () => {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="border-blue-200">
                 <CardHeader>
-                  <CardTitle className="text-blue-600">Short-term Goals (This Month)</CardTitle>
+                  <CardTitle className="text-blue-600 flex items-center gap-2">
+                    <Target className="w-5 h-5" />
+                    Short-term Goals (This Month)
+                  </CardTitle>
+                  <CardDescription>Strategic improvements to implement over the next few weeks</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-3">
                     {results.recommendations.shortTerm.map((action, index) => (
                       <li key={index} className="flex items-start gap-3">
-                        <CheckCircle className="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" />
+                        <Target className="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" />
                         <span>{action}</span>
                       </li>
                     ))}
@@ -344,15 +597,19 @@ const Results = () => {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="border-purple-200">
                 <CardHeader>
-                  <CardTitle className="text-purple-600">Long-term Development (Next 3 Months)</CardTitle>
+                  <CardTitle className="text-purple-600 flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5" />
+                    Long-term Development (Next 3 Months)
+                  </CardTitle>
+                  <CardDescription>Strategic career development initiatives</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-3">
                     {results.recommendations.longTerm.map((action, index) => (
                       <li key={index} className="flex items-start gap-3">
-                        <CheckCircle className="w-5 h-5 text-purple-500 mt-0.5 flex-shrink-0" />
+                        <TrendingUp className="w-5 h-5 text-purple-500 mt-0.5 flex-shrink-0" />
                         <span>{action}</span>
                       </li>
                     ))}
