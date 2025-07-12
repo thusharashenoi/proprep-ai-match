@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AnalysisService } from "@/services/analysisService";
@@ -17,6 +17,15 @@ const Signup = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
+
+  // If already signed in, redirect to jobs dashboard
+  useEffect(() => {
+    if (localStorage.getItem("isAuthenticated") === "true") {
+      const userType = localStorage.getItem("userType");
+      navigate("/jobs"); // Redirect to jobs dashboard for candidates
+      
+    }
+  }, [navigate]);
 
   const handleResumeUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -62,11 +71,19 @@ const Signup = () => {
       setIsSubmitting(false);
       return;
     }
-    const profile = { name, email, phone, linkedinUrl, resumeAnalysis };
-    localStorage.setItem("userProfile", JSON.stringify(profile));
-    localStorage.setItem("isAuthenticated", "true");
+    // Do NOT store resumeFile in localStorage profile
+    const profile = { name, email, phone, linkedinUrl, resumeAnalysis, profilePic, type: "candidate" };
+    try {
+      localStorage.setItem("userProfile", JSON.stringify(profile));
+      localStorage.setItem("isAuthenticated", "true");
+      localStorage.setItem("userType", "candidate");
+    } catch (err) {
+      setError("Profile data is too large to save. Please use a smaller profile picture or try again.");
+      setIsSubmitting(false);
+      return;
+    }
     setIsSubmitting(false);
-    navigate("/jobs");
+    navigate("/jobs"); // Open jobs dashboard after candidate profile creation
   };
 
   return (
@@ -156,6 +173,9 @@ const Signup = () => {
             {error && <div className="text-red-500 text-sm">{error}</div>}
             {passwordError && <div className="text-red-500 text-sm">{passwordError}</div>}
             <Button type="submit" className="w-full" disabled={isSubmitting}>{isSubmitting ? "Creating Profile..." : "Create Profile"}</Button>
+            <div className="flex flex-col items-center mt-2">
+              <span className="text-sm">Already have an account? <Link to="/login" className="text-blue-500 hover:underline">Sign in</Link></span>
+            </div>
           </form>
         </CardContent>
       </Card>

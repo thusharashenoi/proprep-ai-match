@@ -2,8 +2,8 @@ import React, { useEffect, useState, useRef } from "react";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 
 // Use the correct backend endpoint for the LinkedIn analysis HTML report
-// const LINKEDIN_ANALYSIS_API = "http://localhost:3000/api/linkedin/report/linkedin_analysis.html";
-const LINKEDIN_ANALYSIS_API = "https://linkedinanalyzerapi.onrender.com";
+const LINKEDIN_ANALYSIS_API = "http://localhost:3000/api/linkedin/report/linkedin_analysis.html";
+// const LINKEDIN_ANALYSIS_API = "https://linkedinanalyzerapi.onrender.com";
 const LinkedinAnalysis: React.FC = () => {
   const [htmlContent, setHtmlContent] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);

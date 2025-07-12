@@ -14,6 +14,15 @@ import Profile from "./pages/Profile"; // Import the Profile component
 import Jobs from "./pages/JobDescriptionsDashboard"; // Import the correct Jobs component
 import LinkedinAnalysis from "./pages/LinkedinAnalysis"; // Import the new LinkedinAnalysis component
 import Navbar from "@/components/Navbar";
+import EmployerSignup from "./pages/EmployerSignup";
+import EmployerDashboard from "./pages/EmployerDashboard";
+import EmployerNavbar from "./components/EmployerNavbar";
+import UploadJobDescription from "./pages/UploadJobDescription"; // Import the new UploadJobDescription component
+import ViewAllUploads from "./pages/ViewAllUploads"; // Import the ViewAllUploads component
+import Matches from "./pages/Matches"; // Import the Matches component
+import SuggestedJobs from "./pages/SuggestedJobs"; // Import the SuggestedJobs component
+import MockInterviewer from "./pages/MockInterviewer";
+import InterviewReport from "./pages/InterviewReport";
 
 const queryClient = new QueryClient();
 
@@ -23,11 +32,26 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Navbar />
+        {/* Render navbars based on route */}
+        {(() => {
+          const path = window.location.pathname;
+          // Candidate navbar pages
+          if (["/jobs", "/linkedin-analysis", "/resume-analysis", "/profile", "/suggested-jobs", "/mock-interviewer", "/dashboard"].includes(path)) {
+            return <Navbar />;
+          }
+          // Employer navbar pages
+          if (["/view-all-uploads", "/upload-job-descriptions", "/matches", "/employer-dashboard", "/employer-profile"].includes(path)) {
+            return <EmployerNavbar />;
+          }
+          // No navbar for all other pages
+          return null;
+        })()}
         <Routes>
           <Route path="/" element={<Login />} /> {/* Set the root route to render the Login page */}
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/employer-signup" element={<EmployerSignup />} />
+          <Route path="/employer-dashboard" element={<EmployerDashboard />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/jobs" element={<Jobs />} />
           <Route path="/resume-analysis" element={<Analysis />} />
@@ -41,6 +65,12 @@ const App = () => (
               </div>
             }
           /> {/* Add route for LinkedinAnalysis page */}
+          <Route path="/upload-job-descriptions" element={<UploadJobDescription />} /> {/* Add route for UploadJobDescription page */}
+          <Route path="/view-all-uploads" element={<ViewAllUploads />} /> {/* Add route for ViewAllUploads page */}
+          <Route path="/matches" element={<Matches />} /> {/* Add route for Matches page */}
+          <Route path="/suggested-jobs" element={<SuggestedJobs />} /> {/* Add route for SuggestedJobs page */}
+          <Route path="/mock-interviewer" element={<MockInterviewer />} /> {/* Add route for MockInterviewer page */}
+          <Route path="/interview-report" element={<InterviewReport />} /> {/* Add route for InterviewReport page */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

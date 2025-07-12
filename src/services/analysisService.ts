@@ -61,9 +61,7 @@ interface AnalysisResults {
 export class AnalysisService {
   private static GEMINI_API_KEY = 'AIzaSyBg5__RmySYRn3eTNtgd0nn1goaEgZSgjU';
   
-  private static BACKEND_URL = process.env.NODE_ENV === 'production' 
-    ? 'https://linkedinanalyzerapi.onrender.com' 
-    : 'http://localhost:3000';
+  private static BACKEND_URL = 'http://localhost:3000';
 
   static async performAnalysis(data: AnalysisData): Promise<AnalysisResults> {
     try {

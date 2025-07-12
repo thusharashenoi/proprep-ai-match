@@ -136,21 +136,13 @@ const Profile = ({ onProfileSaved }: { onProfileSaved?: () => void }) => {
         <div className="w-full max-w-2xl mx-auto p-10 rounded-2xl shadow-2xl bg-white border border-gray-200">
           {/* Profile Picture Display and Edit */}
           <div className="flex flex-col items-center mb-6">
-            <label htmlFor="profile-pic-upload-summary" className="relative cursor-pointer group">
-              <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden border-2 border-gray-300">
-                {profilePic ? (
-                  <img src={profilePic} alt="Profile" className="object-cover w-full h-full" />
-                ) : (
-                  <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
-                )}
-                {/* Camera icon overlay on hover */}
-                <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536M9 13h6m2 0a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v4a2 2 0 002 2h2m4 0v6m0 0a2 2 0 01-2 2H7a2 2 0 01-2-2v-4a2 2 0 012-2h2" /></svg>
-                </div>
-              </div>
-              <input id="profile-pic-upload-summary" type="file" accept="image/*" className="hidden" onChange={handleProfilePicChange} />
-            </label>
-            <span className="text-xs text-gray-500 mt-2">Click to change profile picture</span>
+            <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden border-2 border-gray-300">
+              {profilePic ? (
+                <img src={profilePic} alt="Profile" className="object-cover w-full h-full" />
+              ) : (
+                <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+              )}
+            </div>
           </div>
           <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
             <div>

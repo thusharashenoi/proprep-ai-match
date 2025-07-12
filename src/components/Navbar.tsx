@@ -6,6 +6,7 @@ const navLinks = [
   { label: "Resume Analysis", to: "/resume-analysis" },
   { label: "LinkedIn Analysis", to: "/linkedin-analysis" },
   { label: "Suggested Jobs", to: "/suggested-jobs" },
+  { label: "Mock Interviewer", to: "/mock-interviewer" }, // NEW PAGE
 ];
 
 const Navbar = () => {

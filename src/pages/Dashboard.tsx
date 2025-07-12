@@ -70,7 +70,7 @@ const ProfileModal = ({ profile, setProfile, onClose }: any) => {
         <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-700">✕</button>
         <div className="flex items-center gap-6 mb-6">
           <label className="relative cursor-pointer">
-            <img src={form.profilePic || "/placeholder.svg"} alt="Profile" className="w-20 h-20 rounded-full object-cover border" />
+            <img src={profile.profilePic || "/placeholder.svg"} alt="Profile" className="w-20 h-20 rounded-full object-cover border" />
           </label>
           <div>
             <h3 className="text-xl font-bold">{form.name}</h3>
