@@ -3,19 +3,16 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
 import Analysis from "./pages/Analysis";
-import Results from "./pages/Results";//results page
 import NotFound from "./pages/NotFound";
-import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login"; // Import the Login component
-import Signup from "./pages/Signup"; // Import the Signup component
-import Profile from "./pages/Profile"; // Import the Profile component
-import Jobs from "./pages/JobDescriptionsDashboard"; // Import the correct Jobs component
+import Signup from "./pages/Employee_Signup"; // Import the Signup component
+import Profile from "./pages/Employee_Profile"; // Import the Profile component
+import Jobs from "./pages/Employee_Dashboard"; // Import the correct Jobs component
 import LinkedinAnalysis from "./pages/LinkedinAnalysis"; // Import the new LinkedinAnalysis component
 import Navbar from "@/components/Navbar";
-import EmployerSignup from "./pages/EmployerSignup";
-import EmployerDashboard from "./pages/EmployerDashboard";
+import EmployerSignup from "./pages/Employer_Signup";
+import EmployerDashboard from "./pages/Employer_Dashboard";
 import EmployerNavbar from "./components/EmployerNavbar";
 import UploadJobDescription from "./pages/UploadJobDescription"; // Import the new UploadJobDescription component
 import ViewAllUploads from "./pages/ViewAllUploads"; // Import the ViewAllUploads component

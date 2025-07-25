@@ -56,19 +56,19 @@ const Analysis = () => {
           <div className="w-full max-w-3xl mx-auto grid grid-cols-2 gap-4 mb-6">
             <div className="bg-white rounded-xl shadow border border-blue-100 p-3 flex flex-col items-center">
               <span className="text-xs text-gray-500 font-semibold mb-1">Content Quality</span>
-              <span className="text-lg font-bold text-blue-700">{resumeAnalysis.atsSubscores.contentQuality}/100</span>
+              <span className="text-lg font-bold text-blue-700">{resumeAnalysis.atsSubscores.contentQuality}/30</span>
             </div>
             <div className="bg-white rounded-xl shadow border border-blue-100 p-3 flex flex-col items-center">
               <span className="text-xs text-gray-500 font-semibold mb-1">Visual Design</span>
-              <span className="text-lg font-bold text-blue-700">{resumeAnalysis.atsSubscores.visualDesign}/100</span>
+              <span className="text-lg font-bold text-blue-700">{resumeAnalysis.atsSubscores.visualDesign}/25</span>
             </div>
             <div className="bg-white rounded-xl shadow border border-blue-100 p-3 flex flex-col items-center">
               <span className="text-xs text-gray-500 font-semibold mb-1">Readability</span>
-              <span className="text-lg font-bold text-blue-700">{resumeAnalysis.atsSubscores.readability}/100</span>
+              <span className="text-lg font-bold text-blue-700">{resumeAnalysis.atsSubscores.readability}/20</span>
             </div>
             <div className="bg-white rounded-xl shadow border border-blue-100 p-3 flex flex-col items-center">
               <span className="text-xs text-gray-500 font-semibold mb-1">Technical Compliance</span>
-              <span className="text-lg font-bold text-blue-700">{resumeAnalysis.atsSubscores.technicalCompliance}/100</span>
+              <span className="text-lg font-bold text-blue-700">{resumeAnalysis.atsSubscores.technicalCompliance}/25</span>
             </div>
           </div>
         )}

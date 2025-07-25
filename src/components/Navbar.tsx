@@ -1,23 +1,46 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getFirestore, doc, getDoc } from "firebase/firestore";
+import { auth, db } from "../firebase"; // your Firebase app instance
 
 const navLinks = [
   { label: "Jobs", to: "/jobs" },
   { label: "Resume Analysis", to: "/resume-analysis" },
   { label: "LinkedIn Analysis", to: "/linkedin-analysis" },
   { label: "Suggested Jobs", to: "/suggested-jobs" },
-  { label: "Mock Interviewer", to: "/mock-interviewer" }, // NEW PAGE
+  { label: "Mock Interviewer", to: "/mock-interviewer" },
 ];
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [jobSearch, setJobSearch] = useState("");
+  const [profile, setProfile] = useState<any>(null);
   const navigate = useNavigate();
   const location = useLocation();
-  const profile = JSON.parse(localStorage.getItem("userProfile") || '{}');
+
+
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const docRef = doc(db, "Employees", user.uid);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          const profileData = docSnap.data();
+          setProfile(profileData);
+          localStorage.setItem("userProfile", JSON.stringify(profileData));
+        }
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   return (
-    <nav className="w-full flex items-center justify-between px-6 py-4 bg-transparent sticky top-0 z-50">
+    <nav className="w-full flex items-center justify-between px-6 py-4 bg-white sticky top-0 z-50">
+
       {/* Hamburger */}
       <div className="relative">
         <button
@@ -44,7 +67,8 @@ const Navbar = () => {
           </div>
         )}
       </div>
-      {/* Only show search bar if on jobs page */}
+
+      {/* Search Bar (only on jobs page) */}
       {location.pathname === "/jobs" && (
         <input
           type="text"
@@ -54,19 +78,28 @@ const Navbar = () => {
           onChange={e => setJobSearch(e.target.value)}
         />
       )}
-      {/* Profile icon */}
+
+      {/* Profile button with image and name */}
+      {/* Profile button with image and name */}
       <button
         className="flex items-center gap-2 ml-auto"
         onClick={() => navigate("/profile")}
         aria-label="Profile"
       >
         <img
-          src={profile.profilePic || "/placeholder.svg"}
+          src={
+            profile?.profilePic
+              ? `data:image/jpeg;base64,${profile.profilePic}`
+              : "/placeholder.svg"
+          }
           alt="Profile"
           className="w-10 h-10 rounded-full border object-cover"
         />
-        <span className="font-medium text-gray-700 hidden md:inline">{profile.name || "Profile"}</span>
+        <span className="font-medium text-gray-700 hidden md:inline">
+          {profile?.name || "Profile"}
+        </span>
       </button>
+
     </nav>
   );
 };
