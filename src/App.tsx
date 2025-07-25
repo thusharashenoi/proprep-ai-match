@@ -3,7 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Analysis from "./pages/Analysis";
+import Analysis from "./pages/Resume_Analysis_Employee";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login"; // Import the Login component
 import Signup from "./pages/Employee_Signup"; // Import the Signup component

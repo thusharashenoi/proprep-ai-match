@@ -11,6 +11,7 @@ const EmployerSignup = () => {
   const [role, setRole] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [phno, setPhno] = useState("");
   const [profilePic, setProfilePic] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -32,7 +33,7 @@ const EmployerSignup = () => {
     setError("");
     setSignupSuccess(false);
 
-    if (!name || !company || !role || !email || !password) {
+    if (!name || !company || !role || !email || !phno || !password) {
       setError("Please fill in all fields.");
       return;
     }
@@ -48,6 +49,7 @@ const EmployerSignup = () => {
         company,
         role,
         email,
+        phno,
         profilePic,
         type: "employer",
       });
@@ -121,6 +123,14 @@ const EmployerSignup = () => {
               className="w-full border rounded px-3 py-2"
               value={role}
               onChange={e => setRole(e.target.value)}
+              required
+            />
+            <input
+              type="tel"
+              placeholder="Phone Number"
+              className="w-full border rounded px-3 py-2"
+              value={phno}
+              onChange={e => setPhno(e.target.value)}
               required
             />
             <input

@@ -36,10 +36,6 @@ const Analysis = () => {
         <div className="w-full flex items-center justify-center mb-2">
           <h1 className="text-2xl md:text-3xl font-bold text-blue-900 tracking-tight">Resume Analysis</h1>
         </div>
-        {/* Option to re-analyze a new resume */}
-        <div className="w-full flex justify-center mt-2 mb-2">
-          <Button variant="outline" onClick={() => { setResumeAnalysis(null); setResumeFile(null); }}>Analyze a Different Resume</Button>
-        </div>
         {/* ATS Score Bar */}
         <div className="w-full flex flex-col items-center mt-4 mb-4">
           <div className="w-full max-w-3xl flex flex-col items-center">

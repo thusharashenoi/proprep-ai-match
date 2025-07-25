@@ -1,5 +1,5 @@
 export class AnalysisService {
-  private static GEMINI_API_KEY = import.meta.env.VITE.GEMINI_API_KEY;
+  private static GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
   /**
    * Analyze resume in Base64 format using Gemini with a detailed prompt
