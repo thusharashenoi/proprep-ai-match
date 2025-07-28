@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { auth, db } from "../firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
-
+// Importing necessary Firebase functions
 const EmployerSignup = () => {
   const navigate = useNavigate();
   const [name, setName] = useState("");
