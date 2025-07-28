@@ -1,0 +1,16 @@
+import React, { useState } from "react";
+import Navbar from "./Navbar"; // Adjust the import path based on your folder structure
+import JobDescriptionsDashboard from "/"; // Adjust the import path
+
+const JobsPage: React.FC = () => {
+  const [jobSearch, setJobSearch] = useState<string>("");
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <Navbar jobSearch={jobSearch} setJobSearch={setJobSearch} />
+      <JobDescriptionsDashboard searchQuery={jobSearch} />
+    </div>
+  );
+};
+
+export default JobsPage;

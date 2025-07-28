@@ -5,7 +5,7 @@ import { Progress } from "@/components/ui/progress";
 import { FileText, Linkedin, Upload, ArrowLeft, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
-import { AnalysisService } from "@/services/analysisService";
+import { AnalysisService } from "@/services/analyse_resume";
 import Navbar from "@/components/Navbar";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card";
@@ -137,7 +137,7 @@ const Analysis = () => {
         description: `${file.name} has been uploaded.`
       });
       try {
-        const analysis = await AnalysisService.analyzeResumeWithGemini(file);
+        const analysis = await AnalysisService.analyzeBase64ResumeWithGemini(file);
         setResumeAnalysis(analysis);
       } catch (error) {
         toast({

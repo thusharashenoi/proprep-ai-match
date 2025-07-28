@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { signInWithEmailAndPassword } from "firebase/auth";
@@ -20,20 +19,50 @@ const Login = () => {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const uid = userCredential.user.uid;
 
-      const collectionName = userType === "employer" ? "Employers" : "Employees";
-      const userRef = doc(db, collectionName, uid);
-      const userSnap = await getDoc(userRef);
+      // Check both collections to determine the actual user type
+      const employeeRef = doc(db, "Employees", uid);
+      const employerRef = doc(db, "Employers", uid);
+      
+      const [employeeSnap, employerSnap] = await Promise.all([
+        getDoc(employeeRef),
+        getDoc(employerRef)
+      ]);
 
-      if (userSnap.exists()) {
-        console.log("Login Success:", userSnap.data());
-        if (userType === "candidate") {
-          navigate("/jobs");
-        } else if (userType === "employer") {
-          navigate("/employer-dashboard");
-        }
-      } else {
-        setError("Profile not found. Please contact support.");
+      let actualUserType: "candidate" | "employer" | null = null;
+      let userData = null;
+
+      if (employeeSnap.exists()) {
+        actualUserType = "candidate";
+        userData = employeeSnap.data();
+      } else if (employerSnap.exists()) {
+        actualUserType = "employer";
+        userData = employerSnap.data();
       }
+
+      if (!actualUserType || !userData) {
+        // Sign out the user since no profile exists
+        await auth.signOut();
+        setError("Profile not found. Please contact support.");
+        return;
+      }
+
+      // Verify that the selected user type matches the actual user type
+      if (userType !== actualUserType) {
+        // Sign out the user to prevent unauthorized access
+        await auth.signOut();
+        const expectedType = actualUserType === "candidate" ? "Employee/Candidate" : "Employer/Company";
+        setError(`Invalid login type. Please select "${expectedType}" and try again.`);
+        return;
+      }
+
+      // Login successful - navigate to appropriate dashboard
+      console.log("Login Success:", userData);
+      if (actualUserType === "candidate") {
+        navigate("/jobs");
+      } else if (actualUserType === "employer") {
+        navigate("/employer-dashboard");
+      }
+
     } catch (err) {
       console.error("Login Error:", err);
       setError("Invalid email or password");

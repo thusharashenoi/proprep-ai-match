@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
-import { auth, db } from "../firebase"; // your Firebase app instance
+import { auth, db } from "../firebase";
 
 const navLinks = [
   { label: "Jobs", to: "/jobs" },
@@ -12,14 +12,16 @@ const navLinks = [
   { label: "Mock Interviewer", to: "/mock-interviewer" },
 ];
 
-const Navbar = () => {
+interface NavbarProps {
+  jobSearch?: string;
+  setJobSearch?: (value: string) => void;
+}
+
+const Navbar = ({ jobSearch = "", setJobSearch }: NavbarProps) => {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [jobSearch, setJobSearch] = useState("");
   const [profile, setProfile] = useState<any>(null);
   const navigate = useNavigate();
   const location = useLocation();
-
-
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -37,6 +39,13 @@ const Navbar = () => {
 
     return () => unsubscribe();
   }, []);
+
+  // Clear search when navigating away from jobs page
+  useEffect(() => {
+    if (location.pathname !== "/jobs" && setJobSearch) {
+      setJobSearch("");
+    }
+  }, [location.pathname, setJobSearch]);
 
   return (
     <nav className="w-full flex items-center justify-between px-6 py-4 bg-white sticky top-0 z-50">
@@ -69,17 +78,16 @@ const Navbar = () => {
       </div>
 
       {/* Search Bar (only on jobs page) */}
-      {location.pathname === "/jobs" && (
+      {location.pathname === "/jobs" && setJobSearch && (
         <input
           type="text"
-          placeholder="Search jobs..."
-          className="w-96 border rounded px-4 py-2 shadow-sm mx-auto"
+          placeholder="Search jobs by role or company..."
+          className="w-96 border rounded px-4 py-2 shadow-sm mx-auto focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           value={jobSearch}
           onChange={e => setJobSearch(e.target.value)}
         />
       )}
 
-      {/* Profile button with image and name */}
       {/* Profile button with image and name */}
       <button
         className="flex items-center gap-2 ml-auto"
