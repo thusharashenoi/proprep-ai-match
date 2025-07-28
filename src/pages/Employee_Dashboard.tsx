@@ -25,6 +25,7 @@ interface Job {
   employerId?: string;
   logo: string;
   company: string; // Using 'company' field as specified
+  tagline?: string; // Added tagline field
 }
 
 interface GroupedJobs {
@@ -43,6 +44,11 @@ const JobDescriptionsDashboard = ({ searchQuery: propSearchQuery = "" }: JobDesc
   
   // Use prop searchQuery if provided, otherwise use internal search
   const searchQuery = propSearchQuery || internalSearchQuery;
+
+  // Helper function to check if job is not accepting responses
+  const isNotAcceptingResponses = (job: Job) => {
+    return job.tagline === "not accepting responses";
+  };
 
   useEffect(() => {
     const fetchAllEmployersAndJobs = async () => {
@@ -77,6 +83,7 @@ const JobDescriptionsDashboard = ({ searchQuery: propSearchQuery = "" }: JobDesc
               employerId,
               logo: profilePic,
               company: company, // Use company field from employer document
+              tagline: data.tagline || "", // Added tagline field
             });
           });
         }
@@ -155,7 +162,11 @@ const JobDescriptionsDashboard = ({ searchQuery: propSearchQuery = "" }: JobDesc
                 {filteredJobs.map((job) => (
                   <Card
                     key={job.id}
-                    className="bg-white rounded-xl shadow-md flex flex-col items-center py-8 w-full cursor-pointer hover:scale-105 transition-transform duration-200"
+                    className={`rounded-xl shadow-md flex flex-col items-center py-8 w-full cursor-pointer hover:scale-105 transition-transform duration-200 ${
+                      isNotAcceptingResponses(job) 
+                        ? "bg-red-50 border-2 border-red-200" 
+                        : "bg-white"
+                    }`}
                     onClick={() => handleCardClick(job)}
                   >
                     <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-3 overflow-hidden">
@@ -169,12 +180,23 @@ const JobDescriptionsDashboard = ({ searchQuery: propSearchQuery = "" }: JobDesc
                         }}
                       />
                     </div>
-                    <div className="text-lg font-semibold mb-2 text-center px-2">
+                    <div className={`text-lg font-semibold mb-2 text-center px-2 ${
+                      isNotAcceptingResponses(job) ? "text-red-700" : ""
+                    }`}>
                       {job.role}
                     </div>
-                    <div className="text-gray-600 text-sm text-center px-2">
+                    <div className={`text-sm text-center px-2 ${
+                      isNotAcceptingResponses(job) ? "text-red-600" : "text-gray-600"
+                    }`}>
                       {job.company}
                     </div>
+                    {isNotAcceptingResponses(job) && (
+                      <div className="mt-2 px-2 py-1 bg-red-100 border border-red-300 rounded-full">
+                        <span className="text-xs font-medium text-red-800">
+                          Not Accepting Applications
+                        </span>
+                      </div>
+                    )}
                   </Card>
                 ))}
               </div>
@@ -231,6 +253,11 @@ const JobDescriptionsDashboard = ({ searchQuery: propSearchQuery = "" }: JobDesc
                       >
                         {selectedJob.priority} Priority
                       </span>
+                      {isNotAcceptingResponses(selectedJob) && (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                          Not Accepting Applications
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -238,6 +265,19 @@ const JobDescriptionsDashboard = ({ searchQuery: propSearchQuery = "" }: JobDesc
               
               {/* Scrollable Content */}
               <div className="flex-1 overflow-y-auto py-4 space-y-6">
+                {/* Show notice if not accepting responses */}
+                {isNotAcceptingResponses(selectedJob) && (
+                  <div className="bg-red-50 border-l-4 border-red-400 p-4">
+                    <div className="flex">
+                      <div className="ml-3">
+                        <p className="text-sm text-red-700 font-medium">
+                          This position is currently not accepting new applications.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Job Overview */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="bg-gray-50 p-4 rounded-lg">
@@ -275,15 +315,17 @@ const JobDescriptionsDashboard = ({ searchQuery: propSearchQuery = "" }: JobDesc
                 )}
               </div>
 
-              {/* Apply Button - Fixed at bottom */}
-              <div className="flex-shrink-0 pt-4 border-t bg-white">
-                <Button 
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-colors duration-200"
-                  size="lg"
-                >
-                  Apply for this Position
-                </Button>
-              </div>
+              {/* Apply Button - Only show if accepting responses */}
+              {!isNotAcceptingResponses(selectedJob) && (
+                <div className="flex-shrink-0 pt-4 border-t bg-white">
+                  <Button 
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-colors duration-200"
+                    size="lg"
+                  >
+                    Apply for this Position
+                  </Button>
+                </div>
+              )}
             </DialogContent>
           </Dialog>
         )}

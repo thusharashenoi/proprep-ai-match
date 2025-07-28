@@ -256,7 +256,6 @@ const Matches: React.FC = () => {
   if (loading) {
     return (
       <>
-        <EmployerNavbar />
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 pt-20 flex items-center justify-center">
           <div className="flex items-center space-x-2">
             <Loader2 className="h-6 w-6 animate-spin" />
@@ -270,7 +269,6 @@ const Matches: React.FC = () => {
   if (error) {
     return (
       <>
-        <EmployerNavbar />
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 pt-20 flex items-center justify-center">
           <Card className="w-full max-w-md">
             <CardContent className="p-6 text-center">
@@ -292,7 +290,6 @@ const Matches: React.FC = () => {
 
   return (
     <>
-      <EmployerNavbar />
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 pt-20">
         <div className="container mx-auto px-4 py-8">
           {/* Header */}

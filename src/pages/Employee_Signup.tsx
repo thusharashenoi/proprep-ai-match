@@ -332,15 +332,52 @@ const EmployeeSignup = () => {
         )}
       </CardHeader>
       <CardContent className="space-y-4">
-        <div>
-          <Input 
-            type="file" 
-            accept="image/*" 
-            onChange={(e) => setProfilePic(e.target.files?.[0] || null)}
-            disabled={loading}
-          />
-          <p className="text-xs text-gray-500 mt-1">Upload your profile picture</p>
-        </div>
+        <div className="flex flex-col items-center mb-4">
+            <label htmlFor="profile-pic-upload" className="relative cursor-pointer group">
+              <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden border-2 border-gray-300">
+                {profilePic ? (
+                  <img
+                    src={URL.createObjectURL(profilePic)}
+                    alt="Profile"
+                    className="object-cover w-full h-full"
+                  />
+                ) : (
+                  <svg
+                    className="w-10 h-10 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                  </svg>
+                )}
+                <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <svg
+                    className="w-6 h-6 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M15.232 5.232l3.536 3.536M9 13h6m2 0a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v4a2 2 0 002 2h2m4 0v6m0 0a2 2 0 01-2 2H7a2 2 0 01-2-2v-4a2 2 0 012-2h2"
+                    />
+                  </svg>
+                </div>
+              </div>
+              <input
+                id="profile-pic-upload"
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => setProfilePic(e.target.files?.[0] || null)}
+              />
+            </label>
+            <span className="text-xs text-gray-500 mt-1">Upload Profile Picture</span>
+          </div>
 
         <Input 
           type="text" 
@@ -452,3 +489,5 @@ const EmployeeSignup = () => {
 };
 
 export default EmployeeSignup;
+
+

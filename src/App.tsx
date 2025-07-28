@@ -18,7 +18,7 @@ import UploadJobDescription from "./pages/UploadJobDescription"; // Import the n
 import ViewAllUploads from "./pages/ViewAllUploads"; // Import the ViewAllUploads component
 import Matches from "./pages/Matches"; // Import the Matches component
 import SuggestedJobs from "./pages/SuggestedJobs"; // Import the SuggestedJobs component
-import MockInterviewer from "./pages/MockInterviewer";
+// import MockInterviewer from "./pages/MockInterviewer";
 import InterviewReport from "./pages/InterviewReport";
 
 const queryClient = new QueryClient();
@@ -66,7 +66,7 @@ const App = () => (
           <Route path="/view-all-uploads" element={<ViewAllUploads />} /> {/* Add route for ViewAllUploads page */}
           <Route path="/matches" element={<Matches />} /> {/* Add route for Matches page */}
           <Route path="/suggested-jobs" element={<SuggestedJobs />} /> {/* Add route for SuggestedJobs page */}
-          <Route path="/mock-interviewer" element={<MockInterviewer />} /> {/* Add route for MockInterviewer page */}
+          {/* <Route path="/mock-interviewer" element={<MockInterviewer />} /> Add route for MockInterviewer page */}
           <Route path="/interview-report" element={<InterviewReport />} /> {/* Add route for InterviewReport page */}
           <Route path="*" element={<NotFound />} />
         </Routes>
