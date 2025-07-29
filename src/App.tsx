@@ -41,6 +41,7 @@ const App = () => (
             return <EmployerNavbar />;
           }
           // No navbar for all other pages
+          //no nav for all other pages
           return null;
         })()}
         <Routes>
