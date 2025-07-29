@@ -37,7 +37,7 @@ const App = () => (
             return <Navbar />;
           }
           // Employer navbar pages
-          if (["/view-all-uploads", "/upload-job-descriptions", "/matches", "/employer-dashboard", "/employer-profile"].includes(path)) {
+          if (["/upload-job-descriptions", "/matches", "/employer-dashboard", "/employer-profile"].includes(path)) {
             return <EmployerNavbar />;
           }
           // No navbar for all other pages
