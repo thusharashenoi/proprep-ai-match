@@ -114,7 +114,7 @@ const EmployeeSignup = () => {
             </h1>
           </div>
           <button
-            onClick={() => navigate("/login")}
+            onClick={() => navigate("./pages/Login")}
             className="text-gray-600 hover:text-gray-800 text-sm font-medium transition-colors"
           >
             ← Back to Login
@@ -199,7 +199,7 @@ const EmployeeSignup = () => {
                 onClick={() => navigate("/login")}
                 className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-4 px-6 rounded-xl font-medium hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200 text-lg"
               >
-                Continue to Dashboard
+                Continue to Login
               </button>
             </div>
           ) : (
@@ -429,7 +429,7 @@ const EmployeeSignup = () => {
                 <p className="text-sm text-gray-600">
                   Already have an account?{" "}
                   <button
-                    onClick={() => navigate("/login")}
+                    onClick={() => navigate("./pages/Login")}
                     className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
                   >
                     Sign in here
