@@ -33,7 +33,7 @@ const App = () => (
         {(() => {
           const path = window.location.pathname;
           // Candidate navbar pages
-          if (["/jobs", "/linkedin-analysis", "/resume-analysis", "/profile", "/suggested-jobs", "/mock-interviewer", "/dashboard"].includes(path)) {
+          if ([ "/resume-analysis" ].includes(path)) {
             return <Navbar />;
           }
           // Employer navbar pages
