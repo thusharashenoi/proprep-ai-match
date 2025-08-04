@@ -33,11 +33,11 @@ const App = () => (
         {(() => {
           const path = window.location.pathname;
           // Candidate navbar pages
-          if (["/jobs", "/linkedin-analysis", "/resume-analysis", "/profile", "/suggested-jobs", "/mock-interviewer", "/dashboard"].includes(path)) {
+          if ([ "/linkedin-analysis", "/suggested-jobs", "/mock-interviewer", "/dashboard"].includes(path)) {
             return <Navbar />;
           }
           // Employer navbar pages
-          if (["/upload-job-descriptions", "/matches", "/employer-dashboard", "/employer-profile"].includes(path)) {
+          if (["/upload-job-descriptions", "/matches"].includes(path)) {
             return <EmployerNavbar />;
           }
           // No navbar for all other pages

@@ -1,14 +1,11 @@
 import { useState } from "react";
-// Note: Replace with your actual routing solution
-// import { useNavigate } from "react-router-dom";
-// import { auth, db } from "../firebase";
-// import { createUserWithEmailAndPassword } from "firebase/auth";
-// import { doc, setDoc } from "firebase/firestore";
+import { useNavigate } from "react-router-dom";
+import { auth, db } from "../firebase";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
 
 const EmployerSignup = () => {
-  // Note: Replace with your actual navigation solution
-  const navigate = (path: string) => console.log(`Navigate to: ${path}`);
-  
+  const navigate = useNavigate();
   const [name, setName] = useState("");
   const [company, setCompany] = useState("");
   const [role, setRole] = useState("");
@@ -31,7 +28,7 @@ const EmployerSignup = () => {
     }
   };
 
-  const handleSubmit = (e: React.MouseEvent | React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setSignupSuccess(false);
@@ -41,15 +38,6 @@ const EmployerSignup = () => {
       return;
     }
 
-    // Simulate signup process for demo
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setSignupSuccess(true);
-    }, 1500);
-
-    // Original Firebase code:
-    /*
     try {
       setLoading(true);
       const userCred = await createUserWithEmailAndPassword(auth, email, password);
@@ -73,7 +61,6 @@ const EmployerSignup = () => {
     } finally {
       setLoading(false);
     }
-    */
   };
 
   return (
@@ -133,7 +120,7 @@ const EmployerSignup = () => {
               </button>
             </div>
           ) : (
-            <div className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
               {/* Profile Picture Upload */}
               <div className="flex flex-col items-center">
                 <label htmlFor="profile-pic-upload" className="relative cursor-pointer group">
@@ -252,7 +239,7 @@ const EmployerSignup = () => {
               )}
 
               <button
-                onClick={handleSubmit}
+                type="submit"
                 disabled={loading}
                 className="w-full bg-gradient-to-r from-purple-500 to-purple-600 text-white py-3 px-6 rounded-xl font-medium hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center"
               >
@@ -273,6 +260,7 @@ const EmployerSignup = () => {
                 <p className="text-sm text-gray-600">
                   Already have an account?{" "}
                   <button
+                    type="button"
                     onClick={() => navigate("/login")}
                     className="text-purple-600 hover:text-purple-700 font-medium transition-colors"
                   >
@@ -280,7 +268,7 @@ const EmployerSignup = () => {
                   </button>
                 </p>
               </div>
-            </div>
+            </form>
           )}
         </div>
 

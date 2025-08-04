@@ -38,7 +38,7 @@ const LinkedinAnalysis: React.FC = () => {
 
         // Construct the full URL for the report
         // Assuming your backend is running on localhost:3000
-        const fullReportUrl = `http://localhost:3000${reportUrl}`;
+        const fullReportUrl = `https://linkedinanalyzerapi-htmq.onrender.com${reportUrl}`;
         
         // Fetch the HTML content from the report URL
         const res = await fetch(fullReportUrl);

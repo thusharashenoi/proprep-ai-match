@@ -1,0 +1,39 @@
+services:
+  - type: web
+    name: linkedin-analyzer-api
+    runtime: docker
+    repo: https://github.com/yourusername/your-backend-repo.git # Replace with your actual repo
+    branch: main
+    dockerfilePath: ./Dockerfile
+    dockerContext: ./
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PUPPETEER_SKIP_CHROMIUM_DOWNLOAD
+        value: "true"
+      - key: PUPPETEER_EXECUTABLE_PATH
+        value: /usr/bin/google-chrome-stable
+      - key: PORT
+        value: "3000"
+      # Add your other environment variables here
+      - key: GEMINI_API_KEY
+        sync: false # This should be set in Render dashboard as a secret
+      # Firebase configuration - set these in Render dashboard as secrets
+      - key: FIREBASE_API_KEY
+        value: "AIzaSyCFVMXftqKhQ0G8xzyEim80MW2DLmU4VAM"
+      - key: FIREBASE_AUTH_DOMAIN
+        value: "proprepai-41e4d.firebaseapp.com"
+      - key: FIREBASE_PROJECT_ID
+        value: "proprepai-41e4d"
+      - key: FIREBASE_STORAGE_BUCKET
+        value: "proprepai-41e4d.firebasestorage.app"
+      - key: FIREBASE_MESSAGING_SENDER_ID
+        value: "371614504676"
+      - key: FIREBASE_APP_ID
+        value: "1:371614504676:web:40f95faa107c4b6a6c3ef1"
+      - key: FIREBASE_MEASUREMENT_ID
+        value: "G-MB7T77Q28B"
+    plan: starter # or whatever plan you prefer
+    region: oregon # or your preferred region
+    healthCheckPath: /health
+    autoDeploy: true

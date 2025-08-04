@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
-import { collection, getDocs, query, orderBy } from "firebase/firestore";
+import { collection, getDocs, query, orderBy, doc, getDoc } from "firebase/firestore";
 import { auth, db } from "../firebase";
-import { X, User, FileText, Linkedin, Mail, Phone, Calendar, MapPin, Award, TrendingUp, AlertCircle, CheckCircle, Search, Filter, LogOut } from "lucide-react";
+import { X, User, FileText, Linkedin, Mail, Phone, Calendar, MapPin, Award, TrendingUp, AlertCircle, CheckCircle, Search, Filter, LogOut, Menu } from "lucide-react";
 
 const EmployerDashboard = () => {
   const navigate = useNavigate();
@@ -15,13 +15,30 @@ const EmployerDashboard = () => {
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [filterByATS, setFilterByATS] = useState(false);
+  
+  // Navbar states
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
+  const [employerProfile, setEmployerProfile] = useState(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (!user) {
         navigate("/login");
       } else {
         setDebugInfo(prev => prev + "\n✓ User authenticated: " + user.uid);
+        
+        // Fetch employer profile
+        try {
+          const docRef = doc(db, "Employers", user.uid);
+          const docSnap = await getDoc(docRef);
+          
+          if (docSnap.exists()) {
+            setEmployerProfile(docSnap.data());
+          }
+        } catch (error) {
+          console.error("Error fetching employer profile:", error);
+        }
       }
     });
 
@@ -474,28 +491,110 @@ const EmployerDashboard = () => {
     <>
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
         
-        {/* Header Section */}
+        {/* Header Section with Integrated Navbar */}
         <div className="bg-white/80 backdrop-blur-sm border-b border-white/20 sticky top-0 z-40">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div className="flex justify-between items-center mb-6">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
-                  <span className="text-white font-bold">PP</span>
+              {/* Left side - Hamburger Menu */}
+              <div className="flex items-center space-x-4">
+                <div className="relative">
+                  <button
+                    className="flex flex-col justify-center items-center w-10 h-10 rounded hover:bg-blue-100 focus:outline-none transition-colors"
+                    onClick={() => setMenuOpen((v) => !v)}
+                    aria-label="Open menu"
+                  >
+                    <Menu size={20} className="text-gray-700" />
+                  </button>
+                  {menuOpen && (
+                    <div className="absolute left-0 mt-2 w-56 bg-white rounded-lg shadow-lg z-50 border border-gray-200">
+                      <button
+                        className="block w-full text-left px-4 py-3 hover:bg-blue-50 transition-colors text-gray-700"
+                        onClick={() => {
+                          setMenuOpen(false);
+                          navigate("/employer-dashboard");
+                        }}
+                      >
+                        Candidate Dashboard
+                      </button>
+                      <button
+                        className="block w-full text-left px-4 py-3 hover:bg-blue-50 transition-colors text-gray-700"
+                        onClick={() => {
+                          setMenuOpen(false);
+                          navigate("/upload-job-descriptions");
+                        }}
+                      >
+                        Upload job descriptions
+                      </button>
+                      <button
+                        className="block w-full text-left px-4 py-3 hover:bg-blue-50 transition-colors text-gray-700"
+                        onClick={() => {
+                          setMenuOpen(false);
+                          navigate("/matches");
+                        }}
+                      >
+                        View Matches
+                      </button>
+                      <button
+                        className="block w-full text-left px-4 py-3 hover:bg-blue-50 transition-colors text-gray-700"
+                        onClick={() => {
+                          setMenuOpen(false);
+                          navigate("/view-all-uploads");
+                        }}
+                      >
+                        All Uploads
+                      </button>
+                    </div>
+                  )}
                 </div>
-                <div>
-                  <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                    proprep.ai
-                  </h1>
-                  <p className="text-sm text-gray-600">Employer Dashboard</p>
+                
+                {/* Brand Logo */}
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
+                    <span className="text-white font-bold">PP</span>
+                  </div>
+                  <div>
+                    <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                      proprep.ai
+                    </h1>
+                    <p className="text-sm text-gray-600">Employer Dashboard</p>
+                  </div>
                 </div>
               </div>
-              <button
-                onClick={handleLogout}
-                className="flex items-center space-x-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-              >
-                <LogOut size={16} />
-                <span className="text-sm">Logout</span>
-              </button>
+
+              {/* Right side - Profile and Logout */}
+              <div className="flex items-center space-x-4">
+                {/* Company Name */}
+                <div className="font-semibold text-blue-700">
+                  {employerProfile?.company || "Employer"}
+                </div>
+                
+                {/* Profile Picture */}
+                {employerProfile?.profilePic && (
+                  <button
+                    className="focus:outline-none"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      setShowProfile(true);
+                    }}
+                    aria-label="View Profile"
+                  >
+                    <img
+                      src={employerProfile.profilePic}
+                      alt="Profile"
+                      className="w-10 h-10 rounded-full object-cover border-2 border-blue-500 hover:shadow-lg transition-all"
+                    />
+                  </button>
+                )}
+                
+                {/* Logout Button */}
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center space-x-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                >
+                  <LogOut size={16} />
+                  <span className="text-sm">Logout</span>
+                </button>
+              </div>
             </div>
             
             <div className="text-center mb-6">
@@ -752,6 +851,32 @@ const EmployerDashboard = () => {
         {/* Profile Modal */}
         {showModal && selectedEmployee && (
           <ProfileModal employee={selectedEmployee} onClose={closeModal} />
+        )}
+
+        {/* Employer Profile Modal */}
+        {showProfile && employerProfile && (
+          <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-8 relative">
+              <button
+                onClick={() => setShowProfile(false)}
+                className="absolute top-4 right-4 text-gray-400 hover:text-gray-700"
+              >
+                <X size={20} />
+              </button>
+              <div className="flex flex-col items-center gap-4">
+                <img
+                  src={employerProfile?.profilePic}
+                  alt="Profile"
+                  className="w-24 h-24 rounded-full object-cover border-2 border-blue-500"
+                />
+                <div className="font-bold text-xl">{employerProfile?.name || "Name"}</div>
+                <div className="text-blue-700 text-md">{employerProfile?.company || "Company"}</div>
+                <div className="text-gray-600 text-sm">{employerProfile?.role || "Role"}</div>
+                <div className="text-gray-500 text-xs">{employerProfile?.email || "Email"}</div>
+                <div className="text-gray-500 text-xs">{employerProfile?.phno || "Phone"}</div>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </>
