@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { useNavigate, Link, useLocation } from "react-router-dom";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { useNavigate, useLocation } from "react-router-dom";
 import { collection, getDocs, doc, getDoc } from "firebase/firestore";
 import { db, auth } from "@/firebase";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,15 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {Search, X, MapPin, Clock, DollarSign, Briefcase, AlertCircle, Menu } from "lucide-react";
-
-const navLinks = [
-  { label: "Jobs", to: "/jobs" },
-  { label: "Resume Analysis", to: "/resume-analysis" },
-  { label: "LinkedIn Analysis", to: "/linkedin-analysis" },
-  { label: "Suggested Jobs", to: "/suggested-jobs" },
-  // { label: "Mock Interviewer", to: "/mock-interviewer" },
-];
+import {Search, X, MapPin, Clock, DollarSign, Briefcase, AlertCircle, Menu, User } from "lucide-react";
 
 interface Job {
   id: string;
@@ -46,6 +38,13 @@ interface JobDescriptionsDashboardProps {
   searchQuery?: string;
 }
 
+const navLinks = [
+  { label: "Jobs", to: "/jobs" },
+  { label: "Resume Analysis", to: "/resume-analysis" },
+  { label: "LinkedIn Analysis", to: "/linkedin-analysis" },
+  { label: "Suggested Jobs", to: "/suggested-jobs" },
+];
+
 const JobDescriptionsDashboard = ({ searchQuery: propSearchQuery = "" }: JobDescriptionsDashboardProps) => {
   const [groupedJobs, setGroupedJobs] = useState<GroupedJobs>({});
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
@@ -53,8 +52,6 @@ const JobDescriptionsDashboard = ({ searchQuery: propSearchQuery = "" }: JobDesc
   const [internalSearchQuery, setInternalSearchQuery] = useState("");
   const [totalJobs, setTotalJobs] = useState(0);
   const [activeJobs, setActiveJobs] = useState(0);
-  
-  // Navbar states
   const [menuOpen, setMenuOpen] = useState(false);
   const [profile, setProfile] = useState<any>(null);
   const navigate = useNavigate();
@@ -66,7 +63,7 @@ const JobDescriptionsDashboard = ({ searchQuery: propSearchQuery = "" }: JobDesc
     return job.tagline === "not accepting responses";
   };
 
-  // Navbar effects
+  // Profile authentication effect
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
@@ -178,111 +175,155 @@ const JobDescriptionsDashboard = ({ searchQuery: propSearchQuery = "" }: JobDesc
     }
   };
 
+  const handleNavigation = (path: string) => {
+    navigate(path);
+    setMenuOpen(false);
+  };
+
+  const handleProfileClick = () => {
+    navigate("/profile");
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-      {/* Integrated Navbar */}
-      <nav className="w-full flex items-center justify-between px-6 py-4 bg-white/90 backdrop-blur-sm border-b border-white/20 sticky top-0 z-50 shadow-sm">
-        {/* Hamburger Menu */}
-        <div className="relative">
-          <button
-            className="flex flex-col justify-center items-center w-10 h-10 rounded hover:bg-blue-100 focus:outline-none transition-colors duration-200"
-            onClick={() => setMenuOpen((v) => !v)}
-            aria-label="Open menu"
-          >
-            <span className="block w-7 h-0.5 bg-gray-800 mb-1 rounded transition-all" />
-            <span className="block w-7 h-0.5 bg-gray-800 mb-1 rounded transition-all" />
-            <span className="block w-7 h-0.5 bg-gray-800 rounded transition-all" />
-          </button>
-          {menuOpen && (
-            <>
-              {/* Backdrop */}
-              <div 
-                className="fixed inset-0 bg-black bg-opacity-25 z-40"
-                onClick={() => setMenuOpen(false)}
-              />
-              {/* Menu */}
-              <div className="absolute left-0 mt-2 w-56 bg-white rounded-lg shadow-lg z-50 border border-gray-200">
-                {navLinks.map(link => (
-                  <Link
-                    key={link.to}
-                    to={link.to}
-                    className={`block px-4 py-3 hover:bg-blue-50 transition-colors duration-200 ${
-                      location.pathname === link.to ? 'font-bold text-blue-700 bg-blue-50' : 'text-gray-700'
-                    } ${link === navLinks[0] ? 'rounded-t-lg' : ''} ${link === navLinks[navLinks.length - 1] ? 'rounded-b-lg' : ''}`}
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    {link.label}
-                  </Link>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
 
-        {/* Job Portal Title and Search Bar */}
-        <div className="flex items-center space-x-6 flex-1 justify-center">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
-              <span className="text-white font-bold text-sm">JP</span>
+      {/* Enhanced Header Section with Navigation */}
+      <div className="bg-white/80 backdrop-blur-sm border-b border-white/20 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            
+            {/* Left Side - Hamburger Menu & Logo */}
+            <div className="flex items-center space-x-4">
+              {/* Hamburger Menu */}
+              <div className="relative">
+                <button
+                  className="flex flex-col justify-center items-center w-10 h-10 rounded-lg hover:bg-blue-100 focus:outline-none transition-colors duration-200"
+                  onClick={() => setMenuOpen(!menuOpen)}
+                  aria-label="Open menu"
+                >
+                  <span className="block w-6 h-0.5 bg-gray-700 mb-1 rounded transition-all" />
+                  <span className="block w-6 h-0.5 bg-gray-700 mb-1 rounded transition-all" />
+                  <span className="block w-6 h-0.5 bg-gray-700 rounded transition-all" />
+                </button>
+                
+                {menuOpen && (
+                  <>
+                    {/* Backdrop */}
+                    <div 
+                      className="fixed inset-0 bg-black bg-opacity-20 z-40"
+                      onClick={() => setMenuOpen(false)}
+                    />
+                    {/* Menu */}
+                    <div className="absolute left-0 mt-2 w-64 bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl z-50 border border-white/30 overflow-hidden">
+                      {navLinks.map((link, index) => (
+                        <button
+                          key={link.to}
+                          onClick={() => handleNavigation(link.to)}
+                          className={`w-full text-left px-6 py-4 hover:bg-blue-50 transition-colors duration-200 ${
+                            index !== navLinks.length - 1 ? 'border-b border-gray-100' : ''
+                          } ${
+                            location.pathname === link.to ? 'font-semibold text-blue-700 bg-blue-50' : 'text-gray-700'
+                          }`}
+                        >
+                          {link.label}
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Logo & Brand */}
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
+                  <span className="text-white font-bold">PP</span>
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    Job Portal
+                  </h1>
+                  <p className="text-sm text-gray-600 hidden sm:block">Discover your next career opportunity</p>
+                </div>
+              </div>
             </div>
-            <div>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Job Portal
-              </h1>
+            
+            {/* Center - Search Bar */}
+            <div className="flex-1 max-w-2xl mx-8 hidden md:block">
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <Search className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  type="text"
+                  value={internalSearchQuery}
+                  onChange={(e) => setInternalSearchQuery(e.target.value)}
+                  placeholder="Search jobs, companies, or locations..."
+                  className="block w-full pl-12 pr-12 py-3 border border-gray-200 rounded-xl leading-5 bg-white/80 backdrop-blur-sm placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm shadow-lg transition-all duration-200"
+                />
+                {internalSearchQuery && (
+                  <div className="absolute inset-y-0 right-0 pr-4 flex items-center">
+                    <button
+                      onClick={() => setInternalSearchQuery("")}
+                      className="text-gray-400 hover:text-gray-600 focus:outline-none transition-colors duration-200"
+                    >
+                      <X className="h-5 w-5" />
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
+
+            {/* Right Side - Profile */}
+            <button
+              onClick={handleProfileClick}
+              className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-blue-50 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              aria-label="Profile"
+            >
+              <img
+                src={
+                  profile?.profilePic
+                    ? `data:image/jpeg;base64,${profile.profilePic}`
+                    : "/placeholder.svg"
+                }
+                alt="Profile"
+                className="w-10 h-10 rounded-full border-2 border-white shadow-sm object-cover"
+              />
+              <span className="font-medium text-gray-700 hidden lg:inline">
+                {profile?.name || "Profile"}
+              </span>
+            </button>
           </div>
-          
-          {/* Search Bar */}
-          <div className="w-full max-w-md">
+
+          {/* Mobile Search Bar */}
+          <div className="mt-4 md:hidden">
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-4 w-4 text-gray-400" />
+                <Search className="h-5 w-5 text-gray-400" />
               </div>
               <input
                 type="text"
                 value={internalSearchQuery}
                 onChange={(e) => setInternalSearchQuery(e.target.value)}
-                placeholder="Search jobs, companies, locations..."
-                className="block w-full pl-9 pr-9 py-2 border border-gray-200 rounded-lg leading-5 bg-white/80 backdrop-blur-sm placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm transition-all duration-200"
+                placeholder="Search jobs, companies, or locations..."
+                className="block w-full pl-10 pr-10 py-3 border border-gray-200 rounded-xl leading-5 bg-white/80 backdrop-blur-sm placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm shadow-lg"
               />
               {internalSearchQuery && (
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
                   <button
                     onClick={() => setInternalSearchQuery("")}
-                    className="text-gray-400 hover:text-gray-600 focus:outline-none transition-colors duration-200"
+                    className="text-gray-400 hover:text-gray-600 focus:outline-none"
                   >
-                    <X className="h-4 w-4" />
+                    <X className="h-5 w-5" />
                   </button>
                 </div>
               )}
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Profile Button */}
-        <button
-          className="flex items-center gap-2 ml-4 hover:bg-gray-50 rounded-lg px-3 py-2 transition-colors duration-200"
-          onClick={() => navigate("/profile")}
-          aria-label="Profile"
-        >
-          <img
-            src={
-              profile?.profilePic
-                ? `data:image/jpeg;base64,${profile.profilePic}`
-                : "/placeholder.svg"
-            }
-            alt="Profile"
-            className="w-8 h-8 rounded-full border object-cover shadow-sm"
-          />
-          <span className="font-medium text-gray-700 hidden md:inline text-sm">
-            {profile?.name || "Profile"}
-          </span>
-        </button>
-      </nav>
-
-      {/* Main Content */}
+      {/* Stats Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Stats Section */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-300">
             <div className="flex items-center">
