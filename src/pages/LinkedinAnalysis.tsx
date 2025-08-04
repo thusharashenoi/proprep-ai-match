@@ -9,7 +9,7 @@ const navLinks = [
   { label: "Jobs", to: "/jobs" },
   { label: "Resume Analysis", to: "/resume-analysis" },
   { label: "LinkedIn Analysis", to: "/linkedin-analysis" },
-  { label: "Suggested Jobs", to: "/suggested-jobs" },
+  { label: "Suggested Jobs", to: "/suggested-jobs"},
 ];
 
 const LinkedinAnalysis: React.FC = () => {
