@@ -32,14 +32,12 @@ const App = () => (
         {/* Render navbars based on route */}
         {(() => {
           const path = window.location.pathname;
-          // Candidate navbar pages
-          if ([ "/linkedin-analysis", "/suggested-jobs", "/mock-interviewer", "/dashboard"].includes(path)) {
-          if ([ "/resume-analysis" ].includes(path)) {
-          }
+          
+          
           // No navbar for all other pages
-          //no nav for all other pages
           return null;
         })()}
+        
         <Routes>
           <Route path="/" element={<Login />} /> {/* Set the root route to render the Login page */}
           <Route path="/login" element={<Login />} />

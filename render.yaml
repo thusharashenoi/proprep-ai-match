@@ -2,7 +2,7 @@ services:
   - type: web
     name: linkedin-analyzer-api
     runtime: docker
-    repo: https://github.com/yourusername/your-backend-repo.git # Replace with your actual repo
+    repo: https://github.com/thusharashenoi/LinkedinAnalyzerApi.git
     branch: main
     dockerfilePath: ./Dockerfile
     dockerContext: ./
